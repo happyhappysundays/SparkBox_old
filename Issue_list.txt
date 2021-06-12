@@ -1,0 +1,3 @@
+Based on Paul's HeltecToSpark9
+
+- Presets with no description cause malformed messsages and misaligned button/icons. FIXED in v0.3
