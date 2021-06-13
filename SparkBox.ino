@@ -9,7 +9,7 @@
 // Defines
 
 #define PGM_NAME "SparkBox"
-#define VERSION "0.3"
+#define VERSION "0.31"
 #define SWITCH_DEBOUNCE 400
 #define NUM_SWITCHES 6
 #define VBAT_AIN 32
@@ -22,15 +22,14 @@ SparkComms spark_comms;
 char str[STR_LEN];                    // Used for processing Spark commands from amp
 char effect_names[4][STR_LEN];        // Track the effect names
 unsigned int cmdsub;
-SparkMessage msg;
+SparkMessage msg;                     // SparkIO messsage/preset variables
 SparkPreset preset;
 SparkPreset presets[6];               // [5] = current preset
 int8_t pre;                           // Internal current preset number
 int8_t selected_preset;               // Reported current preset number
-int i, j, p;
+int i, j, p;                          // Makes these local later...
 int pv;
 int vbat_result;                      // For eventual battery monitoring
-uint8_t b;
 
 // Flags
 bool isBTConnected;                    // Duh
@@ -208,7 +207,6 @@ void loop() {
       presets[5] = presets[selected_preset];
       Serial.print("Change to preset: ");
       Serial.println(selected_preset, HEX);
-      //dump_preset(preset[5]);//debug
       spark_io.get_preset_details(0x0100);
     }      
 
@@ -235,7 +233,7 @@ void loop() {
       Serial.println(selected_preset, HEX);
     }
 
-    // Update local effect names with those in preset
+    // Update local effect names with those in preset. Possibly redundant.
     strcpy(effect_names[0],presets[5].effects[2].EffectName);
     strcpy(effect_names[1],presets[5].effects[4].EffectName);
     strcpy(effect_names[2],presets[5].effects[5].EffectName);
@@ -290,7 +288,7 @@ void loop() {
     Serial.print(effect_names[0]);
     Serial.print(" is ");
     Serial.print(presets[5].effects[2].OnOff);
-    Serial.print(" Toggling ");
+    Serial.print(" toggling ");
 
     if (presets[5].effects[2].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[0],false);
@@ -307,7 +305,7 @@ void loop() {
     Serial.print(effect_names[1]);
     Serial.print(" is ");
     Serial.print(presets[5].effects[4].OnOff);
-    Serial.print(" Toggling ");
+    Serial.print(" toggling ");
 
     if (presets[5].effects[4].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[1],false);
@@ -324,7 +322,7 @@ void loop() {
     Serial.print(effect_names[2]);
     Serial.print(" is ");
     Serial.print(presets[5].effects[5].OnOff);
-    Serial.print(" Toggling ");
+    Serial.print(" toggling ");
       
     if (presets[5].effects[5].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[2],false);
@@ -341,7 +339,7 @@ void loop() {
     Serial.print(effect_names[3]);
     Serial.print(" is ");
     Serial.print(presets[5].effects[6].OnOff);
-    Serial.print(" Toggling ");
+    Serial.print(" toggling ");
       
     if (presets[5].effects[6].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[3],false);
@@ -373,7 +371,7 @@ void loop() {
     oled.display();
   }
   
-  // Preset may have changed so update effect names
+  // Preset may have changed so update effect names Possibly redundant.
   strcpy(effect_names[0],presets[5].effects[2].EffectName);
   strcpy(effect_names[1],presets[5].effects[4].EffectName);
   strcpy(effect_names[2],presets[5].effects[5].EffectName);
