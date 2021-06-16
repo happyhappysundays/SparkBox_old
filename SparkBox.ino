@@ -5,16 +5,11 @@
 #include "SparkComms.h"             // "
 #include "font.h"                   // Custom font
 #include "bitmaps.h"                // Custom bitmaps (icons)
-
-// Defines
+#include "UI.h"                     // Any UI-related defines
 
 #define PGM_NAME "SparkBox"
-#define VERSION "0.31"
-#define SWITCH_DEBOUNCE 400
-#define NUM_SWITCHES 6
-#define VBAT_AIN 32
-
-// Globals
+#define VERSION "0.33"
+#define MAXNAME 20
 
 SSD1306Wire oled(0x3c, SDA, SCL);     // OLED Screen Definitions - ADDRESS, SDA, SCL 
 SparkIO spark_io(false);              // Non-passthrough Spark IO (per Paul)
@@ -28,102 +23,7 @@ SparkPreset presets[6];               // [5] = current preset
 int8_t pre;                           // Internal current preset number
 int8_t selected_preset;               // Reported current preset number
 int i, j, p;                          // Makes these local later...
-int pv;
-int vbat_result;                      // For eventual battery monitoring
-
-// Flags
-bool isBTConnected;                    // Duh
-bool isStatusReceived;                 // Status received from Spark
-bool isOLEDUpdate;                     // Flag OLED needs refresh
-
-unsigned long sw_last_milli[NUM_SWITCHES];  // Used for debouncing
-int sw_val[NUM_SWITCHES];                   
-int sw_pin[]{19,18,4,16,5,23};              // Switch gpio numbers
-                                            // SW1 Toggle Drive 
-                                            // SW2 Toggle Modulation
-                                            // SW3 Toggle Delay
-                                            // SW4 Toggle Reverb
-                                            // SW5 Decrement preset
-                                            // SW6 Increment preset
-
-// Update Icons across top of screen
-void updateIcons() {
-  
-  // Show BT icon if connected
-  if(isBTConnected){
-    oled.drawXbm(btlogo_pos, 0, bt_width, bt_height, bt_bits);
-    // ToDo: measure BT RSSI
-    oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_bits);
-  }
-  // Update drive status icons once data available
-  if(isStatusReceived){  
-    // Drive icon
-    if (presets[5].effects[2].OnOff){
-      oled.drawXbm(drive_pos, 0, icon_width, icon_height, drive_on_bits);
-    }
-    else {
-      oled.drawXbm(drive_pos, 0, icon_width, icon_height, drive_off_bits);   
-    }
-    // Mod icon
-    if (presets[5].effects[4].OnOff) {
-      oled.drawXbm(mod_pos, 0, icon_width, icon_height, mod_on_bits);
-    }
-    else {
-       oled.drawXbm(mod_pos, 0, icon_width, icon_height, mod_off_bits);   
-    }
-    // Delay icon
-    if (presets[5].effects[5].OnOff) {
-      oled.drawXbm(delay_pos, 0, icon_width, icon_height, delay_on_bits);
-    }
-    else {
-       oled.drawXbm(delay_pos, 0, icon_width, icon_height, delay_off_bits);   
-    }
-    // Reverb icon
-    if (presets[5].effects[6].OnOff) {
-      oled.drawXbm(rev_pos, 0, icon_width, icon_height, rev_on_bits);
-    }
-    else {
-       oled.drawXbm(rev_pos, 0, icon_width, icon_height, rev_off_bits);
-    }
-  }
-  
-  // Battery icon control
-  // ToDo: measure battery periodically via a timer
-  vbat_result = analogRead(VBAT_AIN);
-
-  // Coarse cut-offs for visual guide to remaining capacity
-  if (vbat_result < 100) {
-    oled.drawXbm(bat_pos, 0, bat00_width, bat00_height, bat00_bits);
-  }
-  else if (vbat_result < 1500) {
-    oled.drawXbm(bat_pos, 0, bat33_width, bat33_height, bat33_bits);
-  }
-  else if (vbat_result < 3500) {
-    oled.drawXbm(bat_pos, 0, bat66_width, bat66_height, bat66_bits);
-  }
-  else {
-    oled.drawXbm(bat_pos, 0, bat100_width, bat100_height, bat100_bits);
-  } 
-}
-
-void dump_preset(SparkPreset preset) {
-  int i,j;
-
-  Serial.print(preset.curr_preset); Serial.print(" ");
-  Serial.print(preset.preset_num); Serial.print(" ");
-  Serial.print(preset.Name); Serial.print(" ");
-  Serial.println(preset.Description);
-
-  for (j=0; j<7; j++) {
-    Serial.print("    ");
-    Serial.print(preset.effects[j].EffectName); Serial.print(" ");
-    if (preset.effects[j].OnOff == true) Serial.print(" On "); else Serial.print (" Off ");
-    for (i = 0; i < preset.effects[j].NumParameters; i++) {
-      Serial.print(preset.effects[j].Parameters[i]); Serial.print(" ");
-    }
-    Serial.println();
-  }
-}
+int pv, pvsum, sum;
 
 void setup() {
   // Initialize device OLED display, and flip screen, as OLED library starts upside-down
@@ -147,17 +47,12 @@ void setup() {
   spark_comms.start_bt();
   spark_comms.connect_to_spark();
   isBTConnected = true;
-  
+  isPedalMode = true;                   // Effect mode
+    
   Serial.begin(115200);                 // Start serial debug console monitoring via ESP32
   while (!Serial);
   
   pre = 0; // Probably unnecessary
-
-  // Reset switch debounce timers and state
-  for (i = 0; i < NUM_SWITCHES; i++) {
-    sw_last_milli[i] = 0;
-    sw_val[i] = LOW;
-  }
 
   //debug
   spark_io.get_hardware_preset_number();   // Try to use get_hardware_preset_number() to pre-load the correct number
@@ -170,11 +65,9 @@ void loop() {
 
   // Messages from the amp
   if (spark_io.get_message(&cmdsub, &msg, &preset)) { //there is something there
-    // Hopefully this means we have the status
-    isStatusReceived = true;
-
-    //debug - Flag screen update
-    isOLEDUpdate = true;
+    
+    isStatusReceived = true;    // Hopefully this means we have the status
+    isOLEDUpdate = true;        //debug - Flag screen update
 
     Serial.print("From Spark: ");
     Serial.println(cmdsub, HEX);
@@ -189,16 +82,7 @@ void loop() {
       if (j == 0x01)
         p = 5;
       presets[p] = preset;
-      
       dump_preset(preset);//debug
-    
-    }
-
-    // Amp model changed on amp
-    if (cmdsub == 0x0306) {
-      strcpy(presets[5].effects[3].EffectName, msg.str2);
-      Serial.print("Change to amp model ");
-      Serial.println(presets[5].effects[3].EffectName);
     }
 
     // Preset changed on amp
@@ -209,7 +93,7 @@ void loop() {
       Serial.println(selected_preset, HEX);
       spark_io.get_preset_details(0x0100);
     }      
-
+    
     // Store current preset in amp
     if (cmdsub == 0x0327) {
       selected_preset = msg.param2;
@@ -243,26 +127,11 @@ void loop() {
 
   // Update button-led preset number on receipt of hardware preset number
   pre = selected_preset;
-  
-  // Check switch inputs
-  for (i = 0; i < NUM_SWITCHES; i++) {
-    // Reset switch state
-    sw_val[i] = LOW;
-    // See if switch still depressed
-    if (sw_last_milli[i] != 0) {
-      if (millis() - sw_last_milli[i] > SWITCH_DEBOUNCE) 
-        sw_last_milli[i] = 0;
-    }
-    // Debounce check passed
-    if (sw_last_milli[i] == 0) {
-      pv = digitalRead(sw_pin[i]);
-      sw_val[i] = pv;
-      // Timestamp switch press
-      if (pv == HIGH) sw_last_milli[i] = millis();
-    }
-  }
 
-  // Process command to increment preset
+  // Process user input
+  dopushbuttons();
+  
+  // Process command to increment preset PB5
   if (sw_val[5] == HIGH) {      
     // Next preset
     pre++;
@@ -272,8 +141,8 @@ void loop() {
     spark_io.get_preset_details(0x0100);
   }
 
-  // Process command to decrement preset
-   else if (sw_val[4] == HIGH) {  
+  // Process command to decrement preset PB6
+  else if (sw_val[4] == HIGH) {  
     // Previous preset
     pre--;
     if (pre < 0) pre = 3;
@@ -282,14 +151,35 @@ void loop() {
     spark_io.get_preset_details(0x0100);
   }
 
-  // Process effect toggling
+  // Preset mode (SW1-4 directly switch to a preset)
+  else if ((sw_val[0] == HIGH)&&(!isPedalMode)) {  
+    pre = 0;
+    spark_io.change_hardware_preset(pre);
+    presets[5] = presets[pre];
+    spark_io.get_preset_details(0x0100);
+  }
+  else if ((sw_val[1] == HIGH)&&(!isPedalMode)) {  
+    pre = 1;
+    spark_io.change_hardware_preset(pre);
+    presets[5] = presets[pre];
+    spark_io.get_preset_details(0x0100);
+  }
+  else if ((sw_val[2] == HIGH)&&(!isPedalMode)) {  
+    pre = 2;
+    spark_io.change_hardware_preset(pre);
+    presets[5] = presets[pre];
+    spark_io.get_preset_details(0x0100);
+  }
+  else if ((sw_val[3] == HIGH)&&(!isPedalMode)) {  
+    pre = 3;
+    spark_io.change_hardware_preset(pre);
+    presets[5] = presets[pre];
+    spark_io.get_preset_details(0x0100);
+  }
+  
+  // Effect mode (SW1-4 switch effects on/off)
   // Drive
-  else if (sw_val[0] == HIGH) {    
-    Serial.print(effect_names[0]);
-    Serial.print(" is ");
-    Serial.print(presets[5].effects[2].OnOff);
-    Serial.print(" toggling ");
-
+  else if ((sw_val[0] == HIGH)&&(isPedalMode)) {    
     if (presets[5].effects[2].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[0],false);
       presets[5].effects[2].OnOff = false;
@@ -301,12 +191,7 @@ void loop() {
   } 
   
   // Modulation
-  else if (sw_val[1] == HIGH) {    
-    Serial.print(effect_names[1]);
-    Serial.print(" is ");
-    Serial.print(presets[5].effects[4].OnOff);
-    Serial.print(" toggling ");
-
+  else if ((sw_val[1] == HIGH)&&(isPedalMode)) {    
     if (presets[5].effects[4].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[1],false);
       presets[5].effects[4].OnOff = false;
@@ -318,12 +203,7 @@ void loop() {
   }
 
   // Delay
-  else if (sw_val[2] == HIGH) {    
-    Serial.print(effect_names[2]);
-    Serial.print(" is ");
-    Serial.print(presets[5].effects[5].OnOff);
-    Serial.print(" toggling ");
-      
+  else if ((sw_val[2] == HIGH)&&(isPedalMode)) {   
     if (presets[5].effects[5].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[2],false);
       presets[5].effects[5].OnOff = false;
@@ -334,13 +214,8 @@ void loop() {
     }
   }
 
-    // Reverb
-  else if (sw_val[3] == HIGH) {   
-    Serial.print(effect_names[3]);
-    Serial.print(" is ");
-    Serial.print(presets[5].effects[6].OnOff);
-    Serial.print(" toggling ");
-      
+  // Reverb
+  else if ((sw_val[3] == HIGH)&&(isPedalMode)) {   
     if (presets[5].effects[6].OnOff == true) {
       spark_io.turn_effect_onoff(effect_names[3],false);
       presets[5].effects[6].OnOff = false;
@@ -355,21 +230,7 @@ void loop() {
   selected_preset = pre;
 
   // Refresh screen when necessary
-  if (isOLEDUpdate){
-    isOLEDUpdate = false;  
-    oled.clear();
-    oled.setFont(ArialMT_Plain_16);
-    oled.setTextAlignment(TEXT_ALIGN_LEFT);
-    oled.drawString(0, 20, "Preset");
-    oled.setFont(Roboto_Mono_Bold_52);
-    oled.setTextAlignment(TEXT_ALIGN_CENTER);
-    oled.drawString(110, 10, String(selected_preset+1));
-    oled.setFont(ArialMT_Plain_10);
-    oled.setTextAlignment(TEXT_ALIGN_LEFT);
-    oled.drawString(0, 50, presets[5].Name); // might need to size-limit this later on
-    updateIcons();
-    oled.display();
-  }
+  refreshUI();
   
   // Preset may have changed so update effect names Possibly redundant.
   strcpy(effect_names[0],presets[5].effects[2].EffectName);
