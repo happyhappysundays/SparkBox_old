@@ -318,7 +318,7 @@ void SparkIO::read_string(char *str)
   if (a == 0xd9) {
     read_byte(&len);
   }
-  else if (a > 0xa0) {
+  else if (a >= 0xa0) {
     len = a - 0xa0;
   }
   else {
@@ -479,15 +479,15 @@ bool SparkIO::get_message(unsigned int *cmdsub, SparkMessage *msg, SparkPreset *
       read_string(preset->Version);
       read_string(preset->Description);
 
-      // Handle the case where the description is skipped, pushing the next field in its place
+      /*// Handle the case where the description is skipped, pushing the next field in its place
       if (strcmp(preset->Description,"icon.png") == 0){           // Icon data found in description field
         strcpy(preset->Icon,preset->Description);                 // Copy to icon field from description
         strcpy(preset->Description,"");                           // Blank description
       }
       else {
         read_string(preset->Icon);
-      }
-      
+      }*/
+      read_string(preset->Icon);
       read_float(&preset->BPM);
 
       for (j=0; j<7; j++) {

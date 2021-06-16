@@ -1,3 +1,4 @@
 Based on Paul's HeltecToSpark9
 
-- Presets with no description cause malformed messsages and misaligned button/icons. FIXED in v0.3
+v0.33
+- destroyed debounce code while trying to make a long press function.
