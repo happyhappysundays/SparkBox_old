@@ -5,6 +5,8 @@ SparkBox is another BT pedal for the Positive Grid Spark 40.  I only needed the 
 - Switch presets either on footswitch or Spark to update display
 - Switch on and off all four major effects dynamically
 - Graphically display the effect state on the display
+- Supports 4-button pedals
+- Hold down any switch for 1s to switch between Effect mode and Preset mode
 - Rough code in to show batery level on UI
 
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox.jpg?raw=true)
