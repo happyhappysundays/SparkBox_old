@@ -1,4 +1,5 @@
 Based on Paul's HeltecToSpark9
 
 v0.33
-- destroyed debounce code while trying to make a long press function.
+- New functionality (preset/effect) working
+- Weird effect display glitch when switching presets
