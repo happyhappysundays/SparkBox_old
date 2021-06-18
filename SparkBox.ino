@@ -1,6 +1,13 @@
+//******************************************************************************************
+// SparkBox - BT pedal board for the Spark 40 amp - David Thompson 2021
+// Supports four-switch pedals. Hold any of the effect buttons down for 1s to switch
+// between Preset mode (1 to 4) and Effect mode (Drive, Mod, Delay, Reverb)
+// If you have more pushbuttons, switches 5 and 6 switch presets so the board can be left
+// in Effect mode.
+//******************************************************************************************
 #include "SSD1306Wire.h"            // https://github.com/ThingPulse/esp8266-oled-ssd1306
 #include "BluetoothSerial.h"
-#include "Spark.h"                  // Paul Hamshere's SparkIO library
+#include "Spark.h"                  // Paul Hamshere's SparkIO library https://github.com/paulhamsh/SparkIO
 #include "SparkIO.h"                // "
 #include "SparkComms.h"             // "
 #include "font.h"                   // Custom font
@@ -8,14 +15,13 @@
 #include "UI.h"                     // Any UI-related defines
 
 #define PGM_NAME "SparkBox"
-#define VERSION "0.33"
+#define VERSION "0.34"
 #define MAXNAME 20
 
 SSD1306Wire oled(0x3c, SDA, SCL);     // OLED Screen Definitions - ADDRESS, SDA, SCL 
 SparkIO spark_io(false);              // Non-passthrough Spark IO (per Paul)
 SparkComms spark_comms;
 char str[STR_LEN];                    // Used for processing Spark commands from amp
-char effect_names[4][STR_LEN];        // Track the effect names
 unsigned int cmdsub;
 SparkMessage msg;                     // SparkIO messsage/preset variables
 SparkPreset preset;
@@ -47,7 +53,7 @@ void setup() {
   spark_comms.start_bt();
   spark_comms.connect_to_spark();
   isBTConnected = true;
-  isPedalMode = true;                   // Effect mode
+  isPedalMode = false;                  // Preset mode
     
   Serial.begin(115200);                 // Start serial debug console monitoring via ESP32
   while (!Serial);
@@ -56,7 +62,8 @@ void setup() {
 
   //debug
   spark_io.get_hardware_preset_number();   // Try to use get_hardware_preset_number() to pre-load the correct number
-  spark_io.get_preset_details(0x0100);     // Show the current preset details
+  spark_io.get_preset_details(0x7F);       // Get the preset details for 0-3
+  spark_io.get_preset_details(0x0100);     // Get the current preset details
 }
   
 void loop() {
@@ -116,13 +123,6 @@ void loop() {
       Serial.print("Hardware preset is: ");
       Serial.println(selected_preset, HEX);
     }
-
-    // Update local effect names with those in preset. Possibly redundant.
-    strcpy(effect_names[0],presets[5].effects[2].EffectName);
-    strcpy(effect_names[1],presets[5].effects[4].EffectName);
-    strcpy(effect_names[2],presets[5].effects[5].EffectName);
-    strcpy(effect_names[3],presets[5].effects[6].EffectName);
-
   } // get-message
 
   // Update button-led preset number on receipt of hardware preset number
@@ -137,7 +137,6 @@ void loop() {
     pre++;
     if (pre > 3) pre = 0;
     spark_io.change_hardware_preset(pre);
-    presets[5] = presets[pre];                // Update current with newly selected
     spark_io.get_preset_details(0x0100);
   }
 
@@ -147,7 +146,6 @@ void loop() {
     pre--;
     if (pre < 0) pre = 3;
     spark_io.change_hardware_preset(pre);
-    presets[5] = presets[pre];                // Update current with newly selected
     spark_io.get_preset_details(0x0100);
   }
 
@@ -155,25 +153,21 @@ void loop() {
   else if ((sw_val[0] == HIGH)&&(!isPedalMode)) {  
     pre = 0;
     spark_io.change_hardware_preset(pre);
-    presets[5] = presets[pre];
     spark_io.get_preset_details(0x0100);
   }
   else if ((sw_val[1] == HIGH)&&(!isPedalMode)) {  
     pre = 1;
     spark_io.change_hardware_preset(pre);
-    presets[5] = presets[pre];
     spark_io.get_preset_details(0x0100);
   }
   else if ((sw_val[2] == HIGH)&&(!isPedalMode)) {  
     pre = 2;
     spark_io.change_hardware_preset(pre);
-    presets[5] = presets[pre];
     spark_io.get_preset_details(0x0100);
   }
   else if ((sw_val[3] == HIGH)&&(!isPedalMode)) {  
     pre = 3;
     spark_io.change_hardware_preset(pre);
-    presets[5] = presets[pre];
     spark_io.get_preset_details(0x0100);
   }
   
@@ -181,11 +175,11 @@ void loop() {
   // Drive
   else if ((sw_val[0] == HIGH)&&(isPedalMode)) {    
     if (presets[5].effects[2].OnOff == true) {
-      spark_io.turn_effect_onoff(effect_names[0],false);
+      spark_io.turn_effect_onoff(presets[5].effects[2].EffectName,false);
       presets[5].effects[2].OnOff = false;
     }
     else {
-      spark_io.turn_effect_onoff(effect_names[0],true);
+      spark_io.turn_effect_onoff(presets[5].effects[2].EffectName,true);
       presets[5].effects[2].OnOff = true;
     }
   } 
@@ -193,11 +187,11 @@ void loop() {
   // Modulation
   else if ((sw_val[1] == HIGH)&&(isPedalMode)) {    
     if (presets[5].effects[4].OnOff == true) {
-      spark_io.turn_effect_onoff(effect_names[1],false);
+      spark_io.turn_effect_onoff(presets[5].effects[4].EffectName,false);
       presets[5].effects[4].OnOff = false;
     }
     else {
-      spark_io.turn_effect_onoff(effect_names[1],true);
+      spark_io.turn_effect_onoff(presets[5].effects[4].EffectName,true);
       presets[5].effects[4].OnOff = true;
     }
   }
@@ -205,11 +199,11 @@ void loop() {
   // Delay
   else if ((sw_val[2] == HIGH)&&(isPedalMode)) {   
     if (presets[5].effects[5].OnOff == true) {
-      spark_io.turn_effect_onoff(effect_names[2],false);
+      spark_io.turn_effect_onoff(presets[5].effects[5].EffectName,false);
       presets[5].effects[5].OnOff = false;
     }
     else {
-      spark_io.turn_effect_onoff(effect_names[2],true);
+      spark_io.turn_effect_onoff(presets[5].effects[5].EffectName,true);
       presets[5].effects[5].OnOff = true;
     }
   }
@@ -217,11 +211,11 @@ void loop() {
   // Reverb
   else if ((sw_val[3] == HIGH)&&(isPedalMode)) {   
     if (presets[5].effects[6].OnOff == true) {
-      spark_io.turn_effect_onoff(effect_names[3],false);
+      spark_io.turn_effect_onoff(presets[5].effects[6].EffectName,false);
       presets[5].effects[6].OnOff = false;
     }
     else {
-      spark_io.turn_effect_onoff(effect_names[3],true);
+      spark_io.turn_effect_onoff(presets[5].effects[6].EffectName,true);
       presets[5].effects[6].OnOff = true;
     }
   } 
@@ -231,10 +225,4 @@ void loop() {
 
   // Refresh screen when necessary
   refreshUI();
-  
-  // Preset may have changed so update effect names Possibly redundant.
-  strcpy(effect_names[0],presets[5].effects[2].EffectName);
-  strcpy(effect_names[1],presets[5].effects[4].EffectName);
-  strcpy(effect_names[2],presets[5].effects[5].EffectName);
-  strcpy(effect_names[3],presets[5].effects[6].EffectName);
 }
