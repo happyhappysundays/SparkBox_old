@@ -8,7 +8,7 @@ void updateIcons() {
     oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_bits);
   }
   // Update drive status icons once data available
-  if(isStatusReceived){  
+  if(isStatusReceived || isTimeout){  
     // Drive icon
     if (presets[5].effects[2].OnOff){
       oled.drawXbm(drive_pos, 0, icon_width, icon_height, drive_on_bits);
@@ -39,8 +39,11 @@ void updateIcons() {
     }
   }
   // Battery icon control
-  // ToDo: measure battery periodically via a timer
-  vbat_result = analogRead(VBAT_AIN);
+  // Measure battery periodically via a timer
+  if (isTimeout) {
+    vbat_result = analogRead(VBAT_AIN);
+    isTimeout = false;
+  }
 
   // Coarse cut-offs for visual guide to remaining capacity
   if (vbat_result < 100) {
@@ -85,8 +88,8 @@ void dopushbuttons(void)
 {
   // Debounce and long press code
   for (i = 0; i < NUM_SWITCHES; i++) {
-    // If the button pin reads HIGH, the button is pressed (+Vcc switch)
-    if (digitalRead(sw_pin[i]) == HIGH)
+    // If the button pin reads LOW, the button is pressed (GND)
+    if (digitalRead(sw_pin[i]) == LOW)
     {
       // If button was previously off, mark the button as active, and reset the timer
       if (buttonActive[i] == false){
@@ -107,7 +110,7 @@ void dopushbuttons(void)
     // The button either hasn't been pressed, or has been released
     else {
       // Reset switch register here so that switch is not repeated    
-      sw_val[i] = LOW; 
+      sw_val[i] = HIGH; 
       
       // If the button was marked as active, it was recently pressed
       if (buttonActive[i] == true){
@@ -121,7 +124,7 @@ void dopushbuttons(void)
         else {
           // if the button press duration exceeds our bounce threshold, then we register a short press
           if (buttonPressDuration[i] > debounceThreshold){
-            sw_val[i] = HIGH;
+            sw_val[i] = LOW;
           }
         }
         
@@ -147,7 +150,9 @@ void dopushbuttons(void)
 // Refresh UI
 void refreshUI(void)
 {
-  if (isOLEDUpdate){
+  // if a change has been made or the timer timed out and we have the preset...
+  // if ((isOLEDUpdate || isTimeout) && isHWpresetgot){
+  if (isOLEDUpdate || isTimeout){  
     isOLEDUpdate = false;  
     oled.clear();
     oled.setFont(ArialMT_Plain_16);

@@ -1,5 +1,30 @@
 Based on Paul's HeltecToSpark9
+---------------------------------------
 
-v0.33
+v0.34
 - New functionality (preset/effect) working
-- Weird effect display glitch when switching presets
+- All current bugs squashed
+
+v0.35
+- Reconnect working, but some bad messages come through on reconnect
+- Not visible to the user but odd. Could be the hammering of get_hardware_preset
+
+v0.36
+- Reconnect working, but some bad messages come through on reconnect
+- Now cause the first preset read to fail, even on first connect
+- Added timer code to check battery occasionally
+
+v0.40
+- Reverted to older reconnect code. Works well enough
+- Added DEFINE to automate a Heltec vs. Discrete build
+- Changed switch order and polarity to match WIFI Kit version
+- Code functional but debounce not working properly yet
+
+
+
+ToDo:
+- Calibrate battery scale when hardware arrives
+- BT signal strength display
+- Change to BTE connection
+
+
