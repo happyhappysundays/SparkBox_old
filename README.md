@@ -10,5 +10,5 @@ SparkBox is another BT pedal for the Positive Grid Spark 40.  I only needed the 
 - Rough code in to show batery level on UI
 
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/V0_3.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_0_34.png?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/V0_4.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Heltec.png?raw=true)
