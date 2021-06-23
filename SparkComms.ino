@@ -31,7 +31,6 @@ void SparkComms::connect_to_spark() {
   }
 
   // flush anything read from Spark - just in case
-
   while (bt->available())
     b = bt->read(); 
 }
