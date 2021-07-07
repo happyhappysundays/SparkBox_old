@@ -20,11 +20,14 @@ v0.40
 - Changed switch order and polarity to match WIFI Kit version
 - Code functional but debounce not working properly yet
 
-
+v0.46
+- Merge code from Heltec v0.46 version
+- General BLE release
+- Corrected crashes on failed connects
+- BT RSSI display working
+- Possible occasional unsync on reconnect
 
 ToDo:
-- Calibrate battery scale when hardware arrives
-- BT signal strength display
-- Change to BTE connection
+- Fix occasional unsync on reconnect
 
 
