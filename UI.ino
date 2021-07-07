@@ -1,11 +1,35 @@
 // Update Icons across top of screen
 void updateIcons() {
   
+  // Read RSSI from Spark
+  iRSSI = ble_getRSSI();
+
+  //Serial.print("RSSI = ");
+  //Serial.println(iRSSI);
+            
   // Show BT icon if connected
+  // Use graduated scale based on the following
+  // 0 bars (very poor) < -70db
+  // 1 bar (poor) = -70db to -60db
+  // 2 bars (fair) = -60db to -50db
+  // 3 bars (good) = -40db to -50db
+  // 4 bars (excellent) = > -40db
   if(isBTConnected){
     oled.drawXbm(btlogo_pos, 0, bt_width, bt_height, bt_bits);
-    // ToDo: measure BT RSSI
-    oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_bits);
+    // Display BT RSSI icon depending on actual signal
+    if (iRSSI > -40) {
+      oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_4);
+    }
+    else if (iRSSI > -50) {
+      oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_3);
+    }
+    else if (iRSSI > -60) {
+      oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_2);
+    }
+     else if (iRSSI > -70) {
+      oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_2);
+    }
+    // else no bars 
   }
   // Update drive status icons once data available
   if(isStatusReceived || isTimeout){  
@@ -38,29 +62,55 @@ void updateIcons() {
        oled.drawXbm(rev_pos, 0, icon_width, icon_height, rev_off_bits);
     }
   }
-  // Battery icon control
-  // Measure battery periodically via a timer
+  // Battery icon control - measured periodically via a 1s timer
   if (isTimeout) {
-    vbat_result = analogRead(VBAT_AIN);
+    vbat_result = analogRead(VBAT_AIN); // Read battery voltage
+    //Serial.print("Vbat = ");
+    //Serial.print(vbat_result);
+    chrg_result = analogRead(CHRG_AIN); // Check state of /CHRG output
+    //Serial.print(", /CHRG = ");
+    //Serial.println(chrg_result);
     isTimeout = false;
   }
 
-  // Coarse cut-offs for visual guide to remaining capacity
-  if (vbat_result < 100) {
-    oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat00_bits);
-  }
-  else if (vbat_result < 1500) {
-    oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat33_bits);
-  }
-  else if (vbat_result < 2500) {
-    oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat66_bits);
-  }
-  else if (vbat_result < 3500) {
-    oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat100_bits);
-  } 
-  else {
-    oled.drawXbm(bat_pos, 0, bat_width, bat_height, batcharging_bits);
-  } 
+  // Start by showing the empty icon. drawXBM writes OR on the screen so care
+  // must be taken not to graphically block out some symbols. This is why the
+  // battery full but not charging is the last in the chain.
+
+  // No battery monitoring so just show the empty symbol
+  #ifdef BATT_CHECK_0
+  oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat00_bits);
+  
+  // Basic battery detection available. Coarse cut-offs for visual 
+  // guide to remaining capacity.
+  #else
+    if (vbat_result < BATTERY_LOW) {
+      oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat00_bits);
+    }
+    else if (vbat_result < BATTERY_MID) {
+      oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat33_bits);
+    }
+    else if (vbat_result < BATTERY_HIGH) {
+      oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat66_bits);
+    }
+  
+  // If advanced charge detection available, and charge detected
+  #ifdef BATT_CHECK_2
+    else if (chrg_result < CHRG_LOW) {
+      oled.drawXbm(bat_pos, 0, bat_width, bat_height, batcharging_bits);
+    }
+  // For level-based charge detection (not very reliable)
+  #else
+    else if (vbat_result >= BATTERY_CHRG) {
+      oled.drawXbm(bat_pos, 0, bat_width, bat_height, batcharging_bits);
+    }
+  #endif 
+  
+    // Printing this first will block out the charge logo
+    else {
+      oled.drawXbm(bat_pos, 0, bat_width, bat_height, bat100_bits);
+    } 
+  #endif
 }
 
 // Print out the requested preset data
@@ -88,8 +138,8 @@ void dopushbuttons(void)
 {
   // Debounce and long press code
   for (i = 0; i < NUM_SWITCHES; i++) {
-    // If the button pin reads LOW, the button is pressed (GND)
-    if (digitalRead(sw_pin[i]) == LOW)
+    // If the button pin reads HIGH, the button is pressed (VCC)
+    if (digitalRead(sw_pin[i]) == HIGH)
     {
       // If button was previously off, mark the button as active, and reset the timer
       if (buttonActive[i] == false){
@@ -110,7 +160,7 @@ void dopushbuttons(void)
     // The button either hasn't been pressed, or has been released
     else {
       // Reset switch register here so that switch is not repeated    
-      sw_val[i] = HIGH; 
+      sw_val[i] = LOW; 
       
       // If the button was marked as active, it was recently pressed
       if (buttonActive[i] == true){
@@ -124,7 +174,7 @@ void dopushbuttons(void)
         else {
           // if the button press duration exceeds our bounce threshold, then we register a short press
           if (buttonPressDuration[i] > debounceThreshold){
-            sw_val[i] = LOW;
+            sw_val[i] = HIGH;
           }
         }
         
@@ -165,7 +215,7 @@ void refreshUI(void)
     }
     oled.setFont(Roboto_Mono_Bold_52);
     oled.setTextAlignment(TEXT_ALIGN_CENTER);
-    oled.drawString(110, 10, String(selected_preset+1));
+    oled.drawString(110, 12, String(selected_preset+1));
     oled.setFont(ArialMT_Plain_10);
     oled.setTextAlignment(TEXT_ALIGN_LEFT);
 

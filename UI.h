@@ -1,11 +1,20 @@
 // Defines
-#define NUM_SWITCHES 4 //debug
-#define VBAT_AIN 32
+#define NUM_SWITCHES 4
+#define VBAT_AIN 32       // Vbat sense (2:1 divider)
+#define CHRG_AIN 33       // Charge pin sense (10k pull-up)
+#define CHRG_LOW 2000
+#define BATTERY_LOW 2288
+#define BATTERY_MID 2331
+#define BATTERY_HIGH 2399
+#define BATTERY_MAX 2526
+#define BATTERY_CHRG 2560 // Maybe make this higher?
 
 // Globals
+static int iRSSI = 0;                           // BLE signal strength
 int vbat_result;                                // For battery monitoring
+int chrg_result;                                // For charge state monitoring
 int sw_val[NUM_SWITCHES];     
-int sw_pin[]{17,5,18,23,19,0};                 // Switch gpio numbers
+int sw_pin[]{17,5,18,23};                       // Switch gpio numbers
 
                                                 // SW1 Toggle Drive 
                                                 // SW2 Toggle Modulation
@@ -24,9 +33,7 @@ boolean AnylongPressActive = false;             // OR of any longPressActive sta
 boolean latchpress;                             // latch to stop repeating the long press state
 
 // Flags
-boolean isBTConnected;                          // Duh
 boolean isStatusReceived;                       // Status received from Spark
 boolean isOLEDUpdate;                           // Flag OLED needs refresh
 boolean isPedalMode;                            // Pedal mode: 0 = preset, 1 = effect
-boolean isRestarted = true;                     // Flag to show that device has just restarted or reconnected
 boolean isHWpresetgot;                          // Flag to show that the hardware preset number has been processed
