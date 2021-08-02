@@ -1,4 +1,4 @@
-////******************************************************************************************
+//******************************************************************************************
 // SparkBox - BT pedal board for the Spark 40 amp - David Thompson 2021
 // Supports four-switch pedals. Hold any of the effect buttons down for 1s to switch
 // between Preset mode (1 to 4) and Effect mode (Drive, Mod, Delay, Reverb)
@@ -16,21 +16,21 @@
 // Battery charge function defines. Please uncomment just one.
 //
 // You have no mods to monitor the battery, so it will show empty
-//#define BATT_CHECK_0
+#define BATT_CHECK_0
 //
 // You are monitoring the battery via a 2:1 10k/10k resistive divider to GPIO23
 // You can see an accurate representation of the remaining battery charge and a kinda-sorta
 // indicator of when the battery is charging. Maybe.
-#define BATT_CHECK_1
+//#define BATT_CHECK_1
 //
 // You have the battery monitor mod described above AND you have a connection between the 
-// CHRG pin (1) of the TP4054 chip and GPIO 33. Go you! Now you have a guaranteed charge indicator too.
+// CHRG pin of the charger chip and GPIO 33. Go you! Now you have a guaranteed charge indicator too.
 //#define BATT_CHECK_2
 //
 //******************************************************************************************
 
 #define PGM_NAME "SparkBox"
-#define VERSION "BLE 0.47"
+#define VERSION "BLE 0.48"
 #define MAXNAME 20
   
 SSD1306Wire oled(0x3c, 4, 15);        // Default OLED Screen Definitions - ADDRESS, SDA, SCL 
