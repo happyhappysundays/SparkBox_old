@@ -43,9 +43,9 @@ Expression pedal define. Comment this out if you DO NOT have the expression peda
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6994.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/V0_4.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Heltec_Exp.png?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Battery.png?raw=true)
 
 # Parts list
-I'll update the schematic to show the LiPo charge and boost circuitry soon. The parts are included as 10-13 below. Only needed if you want the pedal to be battery powered and chargeable.
 
 | Item | Description           | Link               |
 | -----| ----------------------|--------------------|
