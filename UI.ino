@@ -3,36 +3,33 @@ void updateIcons() {
   
   // Read RSSI from Spark
   iRSSI = ble_getRSSI();
-
-  //Serial.print("RSSI = ");
-  //Serial.println(iRSSI);
             
   // Show BT icon if connected
   // Use graduated scale based on the following
-  // 0 bars (very poor) < -70db
-  // 1 bar (poor) = -70db to -60db
-  // 2 bars (fair) = -60db to -50db
-  // 3 bars (good) = -40db to -50db
+  // 0 bars (very poor) < -95db
+  // 1 bar (poor) = -75db to -95db
+  // 2 bars (fair) = -60db to -75db
+  // 3 bars (good) = -40db to -60db
   // 4 bars (excellent) = > -40db
-  if(isBTConnected){
+  if(connected_sp){
     oled.drawXbm(btlogo_pos, 0, bt_width, bt_height, bt_bits);
     // Display BT RSSI icon depending on actual signal
     if (iRSSI > -40) {
       oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_4);
     }
-    else if (iRSSI > -50) {
+    else if (iRSSI > -60) {
       oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_3);
     }
-    else if (iRSSI > -60) {
+    else if (iRSSI > -75) {
       oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_2);
     }
-     else if (iRSSI > -70) {
-      oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_2);
+    else if (iRSSI > -95) {
+      oled.drawXbm(rssi_pos, 0, rssi_width, rssi_height, rssi_1);
     }
     // else no bars 
   }
   // Update drive status icons once data available
-  if(isStatusReceived || isTimeout){  
+  if(isHWpresetgot){   
     // Drive icon
     if (presets[5].effects[2].OnOff){
       oled.drawXbm(drive_pos, 0, icon_width, icon_height, drive_on_bits);
@@ -66,6 +63,13 @@ void updateIcons() {
   // Average readings to reduce noise
   if (isTimeout) {
     vbat_result = analogRead(VBAT_AIN); // Read battery voltage
+
+    // To speed up the display when a battery is connected from scratch
+    // ignore/fudge any readings below the lower threshold
+    if (vbat_result < BATTERY_LOW)
+    {
+      vbat_result = BATTERY_LOW;
+    }
     temp = vbat_result;
 
     // While collecting data
@@ -80,16 +84,7 @@ void updateIcons() {
       vbat_ring_sum += vbat_result;
       vbat_result = vbat_ring_sum / VBAT_NUM;
     }
-    /*
-    Serial.print("Vbat = ");
-    Serial.print(temp);      
-    Serial.print(" Vbat avg = ");
-    Serial.print(vbat_result);
-    Serial.print(" Count = ");
-    Serial.print(vbat_ring_count);
-    Serial.print(" Sum = ");
-    Serial.println(vbat_ring_sum);
-   */ 
+
     chrg_result = analogRead(CHRG_AIN); // Check state of /CHRG output
     //Serial.print(", /CHRG = ");
     //Serial.println(chrg_result);
@@ -248,8 +243,7 @@ void dopushbuttons(void)
 void refreshUI(void)
 {
   // if a change has been made or the timer timed out and we have the preset...
-  // if ((isOLEDUpdate || isTimeout) && isHWpresetgot){
-  if (isOLEDUpdate || isTimeout){  
+    if ((isOLEDUpdate || isTimeout) && isHWpresetgot){
     isOLEDUpdate = false;  
     oled.clear();
     oled.setFont(ArialMT_Plain_16);
@@ -262,7 +256,14 @@ void refreshUI(void)
     }
     oled.setFont(Roboto_Mono_Bold_52);
     oled.setTextAlignment(TEXT_ALIGN_CENTER);
-    oled.drawString(110, 12, String(selected_preset+1));
+
+    if (flash_GUI || !setting_modified) {
+      // In-joke to the "I saw 5 on the display!" folk
+      if (display_preset_num > 3) {
+        display_preset_num = 3; 
+      }    
+      oled.drawString(110, 12, String(display_preset_num+1));
+    }
     oled.setFont(ArialMT_Plain_10);
     oled.setTextAlignment(TEXT_ALIGN_LEFT);
 
@@ -272,7 +273,29 @@ void refreshUI(void)
     }
     oled.drawString(0, 50, presets[5].Name);
     
+	// Flip GUI flash bool
+    if (isTimeout){
+      flash_GUI = !flash_GUI;
+    }
+    // Flash "Connect App" message when no app connected
+    if (flash_GUI && !connected_app){
+      oled.setFont(ArialMT_Plain_10);
+      oled.setTextAlignment(TEXT_ALIGN_CENTER);
+      oled.drawString(64, 37, "Connect App");
+    }
+	
     updateIcons();
     oled.display();
   }
+  if (!connected_sp) {
+    // Show reconnection message
+    oled.clear();
+    oled.setFont(ArialMT_Plain_16);
+    oled.setTextAlignment(TEXT_ALIGN_CENTER);
+    oled.drawString(64, 10, "Reconnecting");
+    oled.setFont(ArialMT_Plain_16);
+    oled.setTextAlignment(TEXT_ALIGN_CENTER);
+    oled.drawString(64, 35, "Please wait");
+    oled.display();
+  }  
 }

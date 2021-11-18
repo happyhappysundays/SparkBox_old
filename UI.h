@@ -2,6 +2,7 @@
 #define NUM_SWITCHES 4
 #define VBAT_AIN 32       // Vbat sense (2:1 divider)
 #define CHRG_AIN 33       // Charge pin sense (10k pull-up)
+#define EXP_AIN 34        // Expression pedal input (3V3)
 #define CHRG_LOW 2000
 //
 #define BATTERY_LOW 2082  // Noise floor of 3.61V (<5%)
@@ -24,10 +25,16 @@
 // Globals
 static int iRSSI = 0;                           // BLE signal strength
 int vbat_ring_count = 0;
-int vbat_result;                                // For battery monitoring
-int temp;   
 int vbat_ring_sum = 0;
-int chrg_result;                                // For charge state monitoring
+int vbat_result = 0;                            // For battery monitoring
+int express_ring_count = 0;
+int express_ring_sum = 0;
+int express_result = 0;                         // For expression pedal monitoring
+int old_exp_result = 0;
+float effect_volume = 0.0;
+int temp = 0;   
+int chrg_result = 0;                             // For charge state monitoring
+
 int sw_val[NUM_SWITCHES];     
 int sw_pin[]{17,5,18,23};                       // Switch gpio numbers
 
@@ -48,7 +55,6 @@ boolean AnylongPressActive = false;             // OR of any longPressActive sta
 boolean latchpress;                             // latch to stop repeating the long press state
 
 // Flags
-boolean isStatusReceived;                       // Status received from Spark
 boolean isOLEDUpdate;                           // Flag OLED needs refresh
 boolean isPedalMode;                            // Pedal mode: 0 = preset, 1 = effect
 boolean isHWpresetgot;                          // Flag to show that the hardware preset number has been processed
