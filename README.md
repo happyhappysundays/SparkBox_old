@@ -43,3 +43,24 @@ Expression pedal define. Comment this out if you DO NOT have the expression peda
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6994.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/V0_4.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Heltec_Exp.png?raw=true)
+
+# Parts list
+I'll update the schematic to show the LiPo charge and boost circuitry soon. The parts are included as 10-13 below. Only needed if you want the pedal to be battery powered and chargeable.
+
+| Item | Description           | Link               |
+| -----| ----------------------|--------------------|
+|   1  | Box                   |https://www.aliexpress.com/item/32693268669.html?spm=a2g0s.9042311.0.0.27424c4dlzGiUH
+|   2  | Stomp switch          |https://www.aliexpress.com/item/32918205335.html?spm=a2g0s.9042311.0.0.27424c4dszp4Ie
+|   3  | ESP-WROOM-32U module  |https://www.aliexpress.com/item/32864722159.html?spm=a2g0s.9042311.0.0.27424c4dlzGiUH
+|   4  | LCD screen            |https://www.ebay.com.au/itm/333085424031
+|   5  | BT antenna            |https://www.aliexpress.com/item/4001054693109.html?spm=a2g0s.9042311.0.0.27424c4dlzGiUH and https://www.ebay.com.au/itm/233962468558
+|   6  | USB extension         |https://www.aliexpress.com/item/32808991941.html?spm=a2g0s.9042311.0.0.27424c4dlzGiUH
+|   7  | Power switch          |https://www.jaycar.com.au/dpdt-miniature-toggle-switch-solder-tag/p/ST0355
+|   8  | DC input jack         |https://www.jaycar.com.au/2-5mm-bulkhead-male-dc-power-connector/p/PS0524
+|   9  | Pedal jack            |https://www.jaycar.com.au/6-5mm-stereo-enclosed-insulated-switched-socket/p/PS0184
+|  10  | LiPo battery          |https://www.ebay.com.au/itm/133708965813
+|  11  | LiPo charger          |https://www.ebay.com.au/itm/161821599467
+|  12  | LiPo booster          |https://www.jaycar.com.au/arduino-compatible-5v-dc-to-dc-converter-module/p/XC4512
+|  13  | 9V to 5V converter    |https://www.ebay.com.au/itm/303839459634
+|  14  | Glass window (opt)    |https://www.aliexpress.com/item/4000377316108.html?spm=a2g0s.12269583.0.0.1a1e62440DlgU2
+
