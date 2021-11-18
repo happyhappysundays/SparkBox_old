@@ -1,3 +1,6 @@
+# SparkBox V0.56
+This is a Dev Kit 32 version of SparkBox. SparkBox is another BT pedal for the Positive Grid Spark 40.  I only needed the functionality of the simpler BT pedals. However many of them use captured hex chunks to communicate with the Spark, or were Python based. Instead I wanted to use Paul Hamshere's amazing code to create and process real messages. Also I wanted to extend the functionality a bit and make a pretty UI.
+
 # Functions
 - Expression pedal input on D34 for altering the current parameter or on/off switch
 - Uses BLE so that it can be used with music function of the Spark app
@@ -33,6 +36,10 @@ CHRG pin of the charger chip and GPIO 33. Go you! Now you have a guaranteed char
 
 Expression pedal define. Comment this out if you DO NOT have the expression pedal mod.
 
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6791.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6785.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6786.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6994.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/V0_4.jpg?raw=true)
 ![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Heltec.png?raw=true)
