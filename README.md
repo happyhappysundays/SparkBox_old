@@ -19,7 +19,7 @@ Under Files->Preferences->Additional Boards Manager URLs, enter the following:
 - https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/releases/download/0.0.5/package_heltec_esp32_index.json
 
 Under Tools->Board->Board manager ensure that you have the following version:
-- ESP32 by Espressif 1.0.4 (SparkBox - ESP32 Dev Module))
+- ESP32 by Espressif 1.0.4 (SparkBox - ESP32 Dev Module)
 
 Under Tools->Manage Libraries nsure that you have the following libraries and versions:
 - ThingPulse SSD1306 driver 4.2.1 (SparkBox)
