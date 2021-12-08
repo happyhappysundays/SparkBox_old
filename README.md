@@ -15,15 +15,15 @@ This is a Dev Kit 32 version of SparkBox. SparkBox is another BT pedal for the P
 
 # Arduino libraries and board versions
 Under Files->Preferences->Additional Boards Manager URLs, enter the following:
-https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/releases/download/0.0.5/package_heltec_esp32_index.json
+- https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+- https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/releases/download/0.0.5/package_heltec_esp32_index.json
 
 Under Tools->Board->Board manager ensure that you have the following version:
-ESP32 by Espressif 1.0.4 (SparkBox - ESP32 Dev Module))
+- ESP32 by Espressif 1.0.4 (SparkBox - ESP32 Dev Module))
 
 Under Tools->Manage Libraries nsure that you have the following libraries and versions:
-ThingPulse SSD1306 driver 4.2.1 (SparkBox)
-NimBLE=Arduino 1.3.1
+- ThingPulse SSD1306 driver 4.2.1 (SparkBox)
+- NimBLE=Arduino 1.3.1
 
 # Compile options
 
