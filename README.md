@@ -48,14 +48,14 @@ CHRG pin of the charger chip and GPIO 33. Go you! Now you have a guaranteed char
 
 Expression pedal define. Comment this out if you DO NOT have the expression pedal mod.
 
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6791.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6785.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6786.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/thumbnail_IMG_6994.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/V0_4.jpg?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Heltec_Exp.png?raw=true)
-![alt text](https://github.com/happyhappysundays/SparkBox/blob/main/Pictures/SparkBox_Battery.png?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/thumbnail_IMG_6791.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/SparkBox.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/thumbnail_IMG_6785.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/thumbnail_IMG_6786.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/thumbnail_IMG_6994.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/V0_4.jpg?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/SparkBox_Heltec_Exp.png?raw=true)
+![alt text](https://github.com/happyhappysundays/SparkBox_old/blob/main/Pictures/SparkBox_Battery.png?raw=true)
 
 # Parts list
 
